@@ -1,0 +1,11 @@
+{
+  "publicPath": "/keyword-manager-assets/0/",
+  "js": [
+    "/keyword-manager-assets/0/kwm_sem-core.3478cb1d266baafb7b0d.js",
+    "/keyword-manager-assets/0/kwm_vendor.bc9824c3af8f514df14a.js",
+    "/keyword-manager-assets/0/kwm_app.fa1a134aa66c2389e8fb.js"
+  ],
+  "css": [
+    "/keyword-manager-assets/0/kwm_app.style.6053534c715877dbad08.css"
+  ]
+}
