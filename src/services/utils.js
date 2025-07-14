@@ -130,7 +130,9 @@ const genSess = (dataBuffer, userAgent, ipAddr) => {
 };
 const getMembership = async (uid, lid, siteUrl) => {
   try {
-    let site = await siteModel.findOne({ url: siteUrl });
+    const url = new URL(siteUrl);
+    const hostname = url.hostname;
+    let site = await siteModel.findOne({ url: hostname });
     const agent = new https.Agent({
       rejectUnauthorized: false,
     });
