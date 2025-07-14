@@ -2,6 +2,8 @@ const {
   createProxyMiddleware,
   responseInterceptor,
 } = require("http-proxy-middleware");
+const fs = require("fs");
+const path = require("path");
 const cheerio = require("cheerio");
 const { JSON_to_URLEncoded, semrushAutoLogin } = require("../services/utils");
 const FormData = require("form-data");
