@@ -3,10 +3,11 @@ const {
   responseInterceptor,
 } = require("http-proxy-middleware");
 const cheerio = require("cheerio");
-const { JSON_to_URLEncoded } = require("../services/utils");
+const { JSON_to_URLEncoded, semrushAutoLogin } = require("../services/utils");
 const FormData = require("form-data");
 const axios = require("axios");
 const ProxyModel = require("../models/proxy");
+const credentialModel = require("../models/credential");
 
 const semrushMiddleware = (prefix) => {
   return createProxyMiddleware({
@@ -104,6 +105,25 @@ const semrushMiddleware = (prefix) => {
           res.statusCode = 301;
           res.setHeader("location", domain + "/projects");
         }
+        if (req.path == "/do-auto-login") {
+          try {
+            let { username, password } = await credentialModel.findOne({
+              type: "semrush",
+            });
+            let result = await semrushAutoLogin(username, password);
+            if (result) {
+              res.statusCode = 200;
+              return JSON.stringify({ status: true });
+            } else {
+              res.statusCode = 200;
+              return JSON.stringify({ status: false });
+            }
+          } catch (err) {
+            res.statusCode = 200;
+            return JSON.stringify({ status: false });
+          }
+        }
+
         if (proxyRes.headers["location"]) {
           let locale = "",
             target = "";
@@ -132,7 +152,6 @@ const semrushMiddleware = (prefix) => {
           }
         }
 
-
         if (
           proxyRes.headers["content-type"] &&
           proxyRes.headers["content-type"].includes("text/html")
@@ -141,7 +160,7 @@ const semrushMiddleware = (prefix) => {
           let $ = cheerio.load(response);
 
           //we skip instances in which it's not a full web page
-          if (! /<\s*html/.test(response)) {
+          if (!/<\s*html/.test(response)) {
             return response;
           }
 
@@ -204,7 +223,7 @@ const semrushMiddleware = (prefix) => {
           }
 
           let content = $.html();
-          let locale = "en";
+          let locale;
           if (prefix === "www") {
             locale = "en";
           } else {
@@ -212,9 +231,16 @@ const semrushMiddleware = (prefix) => {
           }
 
           content = content.replaceAll(
-            /https:\/\/static.semrush.com/mg,
+            /https:\/\/static.semrush.com/gm,
             staticDomain
           );
+
+          if (req.path == "/") {
+            let html = fs.readFileSync(
+              __dirname + "/../views/semrush-auth.ejs"
+            );
+            return html.toString();
+          }
           return content;
         }
         return responseBuffer;

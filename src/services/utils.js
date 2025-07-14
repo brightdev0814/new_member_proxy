@@ -252,6 +252,62 @@ const writeFile = async (filePath, data) => {
 
   return result;
 };
+
+const semrushAutoLogin = async (email, password) => {
+  return new Promise(async (resolve, reject) => {
+    let siteKey = "6Ldw6DYUAAAAACFCNmvsT32P6VPVonpjbSS7XTA9";
+    let solver = new captcha.Solver(process.env.TWO_CAPTCHA_KEY);
+    let response = await solver.recaptcha(
+      siteKey,
+      "https://www.semrush.com/login"
+    );
+    let body = JSON.stringify({
+      email,
+      password,
+      locale: "en",
+      source: "semrush",
+      "g-recaptcha-response": response.data,
+      "user-agent-hash": crypto
+        .createHash("sha1")
+        .update(email)
+        .digest("hex")
+        .substring(0, 32),
+    });
+    let { data } = await axios.instance.post(
+      "https://www.semrush.com/sso/authorize",
+      body,
+      {
+        headers: {
+          Origin: "https://www.semrush.com",
+          Referer: "https://www.semrush.com/login?src=header",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json; charset=UTF-8",
+          "Content-Length": Buffer.from(body, "utf-8"),
+        },
+      }
+    );
+    if (data.user_id) {
+      let cookie = axios.cookieJar.getCookieStringSync(
+        "https://www.semrush.com"
+      );
+      await settingModel.findOneAndUpdate(
+        null,
+        {
+          semrushCookie: cookie,
+        },
+        {
+          upsert: true,
+        }
+      );
+      resolve(true);
+    } else {
+      resolve(false);
+    }
+  });
+};
+
 const spamzillaAutoLogin = async (email, password) => {
   return new Promise(async (resolve, reject) => {
     puppeteer.use(stealthPlugin());
@@ -2901,6 +2957,7 @@ module.exports = {
   onehourindexingAuthLogin,
   ranxplorerAuthLogin,
   woorankAuthLogin,
+  semrushAutoLogin,
   seolyzeAuthLogin,
   seobserverAuthLogin,
   seozoomAuthLogin,
