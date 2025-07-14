@@ -273,7 +273,7 @@ const semrushAutoLogin = async (email, password) => {
         .digest("hex")
         .substring(0, 32),
     });
-    let { data } = await axios.instance.post(
+    let { data } = await http.instance.post(
       "https://www.semrush.com/sso/authorize",
       body,
       {
@@ -289,7 +289,7 @@ const semrushAutoLogin = async (email, password) => {
       }
     );
     if (data.user_id) {
-      let cookie = axios.cookieJar.getCookieStringSync(
+      let cookie = http.cookieJar.getCookieStringSync(
         "https://www.semrush.com"
       );
       await settingModel.findOneAndUpdate(
