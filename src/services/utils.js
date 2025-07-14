@@ -303,9 +303,9 @@ const semrushAutoLogin = async (email, password) => {
           upsert: true,
         }
       );
-      resolve(true);
+      return resolve(true);
     } else {
-      resolve(false);
+      return resolve(false);
     }
   });
 };
@@ -391,7 +391,7 @@ const spamzillaAutoLogin = async (email, password) => {
             upsert: true,
           }
         );
-        resolve(true);
+        return resolve(true);
       }
     });
   });
