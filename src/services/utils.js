@@ -273,6 +273,7 @@ const semrushAutoLogin = async (email, password) => {
         .digest("hex")
         .substring(0, 32),
     });
+    console.log(email, password);
     let { data } = await http.instance.post(
       "https://www.semrush.com/sso/authorize",
       body,
@@ -288,6 +289,7 @@ const semrushAutoLogin = async (email, password) => {
         },
       }
     );
+    console.log(data);
     if (data.user_id) {
       let cookie = http.cookieJar.getCookieStringSync(
         "https://www.semrush.com"
